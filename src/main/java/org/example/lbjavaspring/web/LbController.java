@@ -28,7 +28,7 @@ public class LbController {
                 .method(HttpMethod.GET)
                 .headers(extractHeaders(request))
                 .build();
-        log.info("Load balancing Request :: {}", lbRequest);
+        log.info("Load balancing {} request :: {}", lbRequest.method(), lbRequest.path());
         return httpLoadBalancer.handle(lbRequest);
     }
 

@@ -31,7 +31,7 @@ public class HttpLoadBalancer implements LoadBalancer {
     @Override
     public ResponseEntity<String> handle(final Request request) {
         final ServerInstance handler = selectServer();
-        log.info("Handling request {} on server {}", request, handler);
+        log.info("Handling {} request {} on server {}", request.method(), request.path(), handler);
         final String target = handler.getServerInfo().address().concat(request.path());
 
         handler.incrementConnections();
