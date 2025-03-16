@@ -31,12 +31,17 @@ public class HttpLoadBalancer implements LoadBalancer {
     @Override
     public ResponseEntity<String> handle(final Request request) {
         final ServerInstance handler = selectServer();
+        log.info("Handling request {} on server {}", request, handler);
         final String target = handler.getAddress().concat(request.path());
 
         handler.incrementConnections();
+
         final long startTime = System.currentTimeMillis();
         final ResponseEntity<String> response = restTemplate.getForEntity(target, String.class);
-        handler.updateLastResponseTime(System.currentTimeMillis() - startTime);
+        final long endTime = System.currentTimeMillis() - startTime;
+        log.info("{} took {} ms to handle request", handler.getName(), endTime);
+
+        handler.updateLastResponseTime(endTime);
         handler.decrementConnections();
 
         return response;
