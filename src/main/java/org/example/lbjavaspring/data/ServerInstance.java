@@ -31,4 +31,12 @@ public class ServerInstance {
     public void updateLastResponseTime(final Long time) {
         this.lastResponseTime.set(time);
     }
+
+    public int connections() {
+        return this.connections.get();
+    }
+
+    public long lastResponseTime() {
+        return this.lastResponseTime.get();
+    }
 }

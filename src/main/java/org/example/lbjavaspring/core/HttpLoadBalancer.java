@@ -63,4 +63,8 @@ public class HttpLoadBalancer implements LoadBalancer {
     private Collection<ServerInstance> healthyServers() {
         return this.serverStore.getAll();
     }
+
+    //TODO: Feature -> Add health check on the servers, and remove unhealthy servers
+    //TODO: Feature -> Add new servers on the fly with an endpoint
+    //TODO: Feature -> Statistics endpoint
 }
