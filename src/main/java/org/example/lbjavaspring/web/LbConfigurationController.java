@@ -54,11 +54,11 @@ public class LbConfigurationController {
 
     @PostMapping("/server")
     public ResponseEntity<String> addServer(@RequestBody final AddServerPayload addServerPayload) {
-        serverStore.put(addServerPayload.name(), getServerInstance(addServerPayload));
+        serverStore.put(addServerPayload.name(), buildServerInstance(addServerPayload));
         return ResponseEntity.ok().build();
     }
 
-    private static ServerInstance getServerInstance(final AddServerPayload addServerPayload) {
+    private static ServerInstance buildServerInstance(final AddServerPayload addServerPayload) {
         return ServerInstance.builder().server(Server.builder().name(addServerPayload.name()).address(addServerPayload.address()).build()).build();
     }
 

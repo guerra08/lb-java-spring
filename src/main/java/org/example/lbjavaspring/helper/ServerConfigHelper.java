@@ -9,6 +9,7 @@ import org.example.lbjavaspring.data.ServerInstance;
 import org.example.lbjavaspring.exception.ConfigurationException;
 
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -27,17 +28,30 @@ public class ServerConfigHelper {
         // Load server configurations from a file or database
         // Let's do it over a file for simplicity
         // File format: server name,server address
-        try (var br = Files.newBufferedReader(Paths.get(ClassLoader.getSystemResource(path).toURI()))) {
-            return br.lines()
-                    .map(line -> line.split(SEPARATOR))
-                    .collect(
-                            ConcurrentHashMap::new,
-                            (map, arr) -> map.put(arr[0].trim(), getServerInstance(arr)),
-                            ConcurrentMap::putAll
-                    );
+
+        try {
+            final Path filePath = Paths.get(ClassLoader.getSystemResource(path).toURI());
+
+            if (!Files.exists(filePath)) {
+                log.info("File does not exist, returning empty map");
+                return new ConcurrentHashMap<>();
+            }
+
+            try (var br = Files.newBufferedReader(filePath)) {
+                return br.lines()
+                        .map(line -> line.split(SEPARATOR))
+                        .collect(
+                                ConcurrentHashMap::new,
+                                (map, arr) -> map.put(arr[0].trim(), getServerInstance(arr)),
+                                ConcurrentMap::putAll
+                        );
+            } catch (Exception e) {
+                log.error("Error loading server configurations", e);
+                throw new ConfigurationException(e.getMessage(), e);
+            }
         } catch (Exception e) {
-            log.error("Error loading server configurations", e);
-            throw new ConfigurationException(e.getMessage(), e);
+            log.error("An error happened on the configuration file loading...");
+            throw new ConfigurationException("An error happened on the configuration file loading", e);
         }
     }
 

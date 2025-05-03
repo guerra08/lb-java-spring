@@ -2,18 +2,17 @@ package org.example.lbjavaspring.core;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.lbjavaspring.core.helper.HealthCheckHelper;
 import org.example.lbjavaspring.store.ServerStore;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClient;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class HealthCheck {
 
-    private final RestClient restClient = RestClient.create();
     private final ServerStore serverStore;
+    private final HealthCheckHelper helper;
 
     public void healthCheck() {
         log.info("Executing health check on servers...");
@@ -22,15 +21,10 @@ public class HealthCheck {
             log.error("No healthy servers available");
         }
 
-        serverStore.getAllEntries().parallelStream().forEach(entry -> {
+        serverStore.getAllEntries().forEach(entry -> {
             try {
                 final String uri = entry.getValue().getServer().address().concat("/health");
-                final ResponseEntity<String> response = restClient
-                        .get()
-                        .uri(uri)
-                        .retrieve()
-                        .toEntity(String.class);
-                if (!response.getStatusCode().is2xxSuccessful()) {
+                if (!helper.isServerHealthy(uri)) {
                     log.error("Server {} is not healthy", entry.getValue().getServer().name());
                     serverStore.remove(entry.getKey());
                 }

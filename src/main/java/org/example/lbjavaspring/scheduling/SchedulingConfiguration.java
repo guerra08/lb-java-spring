@@ -15,7 +15,10 @@ public class SchedulingConfiguration {
 
     private final HealthCheck healthCheck;
 
-    @Scheduled(fixedRate = 5000L)
+    /**
+     * Schedules health check of the configured servers at every 10 seconds, initial delay of 5 seconds
+     */
+    @Scheduled(fixedRate = 10_000L, initialDelay = 5_000L)
     public void healthCheck() {
         this.healthCheck.healthCheck();
     }
