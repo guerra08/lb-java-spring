@@ -2,7 +2,7 @@ package org.example.lbjavaspring.web;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.lbjavaspring.data.AddServerRequest;
+import org.example.lbjavaspring.data.AddServerPayload;
 import org.example.lbjavaspring.data.Server;
 import org.example.lbjavaspring.data.ServerStatistics;
 import org.example.lbjavaspring.store.KeyValueStore;
@@ -53,13 +53,13 @@ public class LbConfigurationController {
     }
 
     @PostMapping("/server")
-    public ResponseEntity<String> addServer(@RequestBody final AddServerRequest addServerRequest) {
-        serverStore.put(addServerRequest.name(), getServerInstance(addServerRequest));
+    public ResponseEntity<String> addServer(@RequestBody final AddServerPayload addServerPayload) {
+        serverStore.put(addServerPayload.name(), getServerInstance(addServerPayload));
         return ResponseEntity.ok().build();
     }
 
-    private static ServerInstance getServerInstance(final AddServerRequest addServerRequest) {
-        return ServerInstance.builder().server(Server.builder().name(addServerRequest.name()).address(addServerRequest.address()).build()).build();
+    private static ServerInstance getServerInstance(final AddServerPayload addServerPayload) {
+        return ServerInstance.builder().server(Server.builder().name(addServerPayload.name()).address(addServerPayload.address()).build()).build();
     }
 
 }

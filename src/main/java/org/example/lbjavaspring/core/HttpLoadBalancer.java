@@ -7,7 +7,7 @@ import org.example.lbjavaspring.data.Request;
 import org.example.lbjavaspring.data.ServerInstance;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -17,13 +17,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 public class HttpLoadBalancer implements LoadBalancer {
 
-    private final RestTemplate restTemplate;
+    private final RestClient restClient = RestClient.create();
     private final AtomicInteger roundRobinCounter = new AtomicInteger(0);
     private final Store<Algorithm> algorithmStore;
     private final KeyValueStore<ServerInstance> serverStore;
 
-    public HttpLoadBalancer(RestTemplate restTemplate, Store<Algorithm> algorithmStore, KeyValueStore<ServerInstance> serverStore) {
-        this.restTemplate = restTemplate;
+    public HttpLoadBalancer(Store<Algorithm> algorithmStore, KeyValueStore<ServerInstance> serverStore) {
         this.algorithmStore = algorithmStore;
         this.serverStore = serverStore;
     }
@@ -37,7 +36,11 @@ public class HttpLoadBalancer implements LoadBalancer {
         handler.incrementConnections();
 
         final long startTime = System.currentTimeMillis();
-        final ResponseEntity<String> response = restTemplate.getForEntity(target, String.class);
+        final ResponseEntity<String> response = restClient
+                .method(request.method())
+                .uri(target)
+                .retrieve()
+                .toEntity(String.class);
         final long endTime = System.currentTimeMillis() - startTime;
         log.info("{} took {} ms to handle request", handler.getServer().name(), endTime);
 
