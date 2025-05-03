@@ -8,9 +8,6 @@ public class LbJavaSpringApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(LbJavaSpringApplication.class, args);
-        // Load server configuration
-        // Schedule health check
-        // Start load balancer service
     }
 
 }

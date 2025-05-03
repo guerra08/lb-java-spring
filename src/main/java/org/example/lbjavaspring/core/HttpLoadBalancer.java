@@ -32,14 +32,14 @@ public class HttpLoadBalancer implements LoadBalancer {
     public ResponseEntity<String> handle(final Request request) {
         final ServerInstance handler = selectServer();
         log.info("Handling {} request {} on server {}", request.method(), request.path(), handler);
-        final String target = handler.getServerInfo().address().concat(request.path());
+        final String target = handler.getServer().address().concat(request.path());
 
         handler.incrementConnections();
 
         final long startTime = System.currentTimeMillis();
         final ResponseEntity<String> response = restTemplate.getForEntity(target, String.class);
         final long endTime = System.currentTimeMillis() - startTime;
-        log.info("{} took {} ms to handle request", handler.getServerInfo().name(), endTime);
+        log.info("{} took {} ms to handle request", handler.getServer().name(), endTime);
 
         handler.updateLastResponseTime(endTime);
         handler.decrementConnections();
@@ -49,22 +49,27 @@ public class HttpLoadBalancer implements LoadBalancer {
 
     private ServerInstance selectServer() {
         return switch (algorithmStore.get()) {
-            case ROUND_ROBIN -> {
-                int index = roundRobinCounter.getAndIncrement() % healthyServers().size(); // Get the current index, increment and check if it's within the range of servers
-                yield healthyServers().toArray(new ServerInstance[0])[index];
-            }
-            case LEAST_CONNECTIONS ->
-                    healthyServers().stream().min(Comparator.comparingInt(s -> s.getConnections().get())).orElseThrow();
-            case RESPONSE_TIME ->
-                    healthyServers().stream().min(Comparator.comparingLong(s -> s.getLastResponseTime().get())).orElseThrow();
+            case ROUND_ROBIN -> selectForRoundRobin();
+            case LEAST_CONNECTIONS -> selectForLeastConnections();
+            case RESPONSE_TIME -> selectForResponseTime();
         };
+    }
+
+    private ServerInstance selectForResponseTime() {
+        return healthyServers().stream().min(Comparator.comparingLong(s -> s.getLastResponseTime().get())).orElseThrow(() -> new IllegalStateException("Unable to find server with least response time"));
+    }
+
+    private ServerInstance selectForLeastConnections() {
+        return healthyServers().stream().min(Comparator.comparingInt(s -> s.getConnections().get())).orElseThrow(() -> new IllegalStateException("Unable to find server with least connections"));
+    }
+
+    private ServerInstance selectForRoundRobin() {
+        int index = roundRobinCounter.getAndIncrement() % healthyServers().size(); // Get the current index, increment and check if it's within the range of servers
+        return healthyServers().toArray(new ServerInstance[0])[index];
     }
 
     private Collection<ServerInstance> healthyServers() {
         return this.serverStore.getAll();
     }
 
-    //TODO: Feature -> Add health check on the servers, and remove unhealthy servers
-    //TODO: Feature -> Add new servers on the fly with an endpoint
-    //TODO: Feature -> Statistics endpoint
 }

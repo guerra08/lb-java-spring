@@ -6,6 +6,8 @@ import org.example.lbjavaspring.helper.ServerConfigHelper;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
 @Configuration
@@ -24,8 +26,18 @@ public class ServerStore implements KeyValueStore<ServerInstance> {
     }
 
     @Override
+    public Set<Map.Entry<String, ServerInstance>> getAllEntries() {
+        return this.servers.entrySet();
+    }
+
+    @Override
     public void put(String key, ServerInstance value) {
         this.servers.put(key, value);
+    }
+
+    @Override
+    public void remove(String key) {
+        this.servers.remove(key);
     }
 
 }

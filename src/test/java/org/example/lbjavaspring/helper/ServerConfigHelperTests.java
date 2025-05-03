@@ -19,9 +19,9 @@ class ServerConfigHelperTests {
 
         // Assuming the file contains at least one known server configuration for testing
         assertTrue(serverConfigurations.containsKey("server1"), "Server configurations should contain 'server1'");
-        Server server = serverConfigurations.get("server1").getServerInfo();
+        Server server = serverConfigurations.get("server1").getServer();
         assertEquals("server1", server.name(), "Server name should be 'server1'");
-        assertEquals("localhost:8081", server.address(), "Server address should be 'localhost:8081'");
+        assertEquals("http://localhost:8081", server.address(), "Server address should be 'http://localhost:8081'");
     }
 
 }

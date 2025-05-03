@@ -5,6 +5,7 @@ import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.ToString;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -13,8 +14,9 @@ import java.util.concurrent.atomic.AtomicLong;
 @ToString
 public class ServerInstance {
 
-    private Server serverInfo;
-    private boolean healthy;
+    private Server server;
+    @Builder.Default
+    private AtomicBoolean isHealthy = new AtomicBoolean(true);
     @Default
     private AtomicInteger connections = new AtomicInteger(0);
     @Default
@@ -38,5 +40,9 @@ public class ServerInstance {
 
     public long lastResponseTime() {
         return this.lastResponseTime.get();
+    }
+
+    public ServerStatistics getStatistics() {
+        return ServerStatistics.fromServer(this);
     }
 }
