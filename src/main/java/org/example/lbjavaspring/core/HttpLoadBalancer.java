@@ -13,9 +13,11 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.lang.System.currentTimeMillis;
+
 @Component
 @Slf4j
-public class HttpLoadBalancer implements LoadBalancer {
+public class HttpLoadBalancer implements LoadBalancer<String> {
 
     private final RestClient restClient = RestClient.create();
     private final AtomicInteger roundRobinCounter = new AtomicInteger(0);
@@ -35,13 +37,13 @@ public class HttpLoadBalancer implements LoadBalancer {
 
         handler.incrementConnections();
 
-        final long startTime = System.currentTimeMillis();
+        final long startTime = currentTimeMillis();
         final ResponseEntity<String> response = restClient
                 .method(request.method())
                 .uri(target)
                 .retrieve()
                 .toEntity(String.class);
-        final long endTime = System.currentTimeMillis() - startTime;
+        final long endTime = currentTimeMillis() - startTime;
         log.info("{} took {} ms to handle request", handler.getServer().name(), endTime);
 
         handler.updateLastResponseTime(endTime);

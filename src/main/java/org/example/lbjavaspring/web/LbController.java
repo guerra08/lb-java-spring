@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class LbController {
 
-    private final LoadBalancer httpLoadBalancer;
+    private final LoadBalancer<String> httpLoadBalancer;
 
     @GetMapping("/**")
     public ResponseEntity<String> get(final HttpServletRequest request) {
