@@ -22,12 +22,12 @@ public class ServerInstance {
     @Default
     private AtomicLong lastResponseTime = new AtomicLong(0);
 
-    public int incrementConnections() {
-        return this.connections.incrementAndGet();
+    public void incrementConnections() {
+        this.connections.decrementAndGet();
     }
 
-    public int decrementConnections() {
-        return this.connections.decrementAndGet();
+    public void decrementConnections() {
+        this.connections.decrementAndGet();
     }
 
     public void updateLastResponseTime(final Long time) {

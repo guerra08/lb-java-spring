@@ -5,5 +5,5 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 
 @Builder
-public record Request(String path, HttpMethod method, HttpHeaders headers) {
+public record Request(String path, HttpMethod method, HttpHeaders headers, byte[] body) {
 }

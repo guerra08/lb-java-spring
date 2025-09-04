@@ -41,6 +41,8 @@ public class HttpLoadBalancer implements LoadBalancer<String> {
         final ResponseEntity<String> response = restClient
                 .method(request.method())
                 .uri(target)
+                .headers(httpHeaders -> httpHeaders.addAll(request.headers()))
+                .body(request.body())
                 .retrieve()
                 .toEntity(String.class);
         final long endTime = currentTimeMillis() - startTime;

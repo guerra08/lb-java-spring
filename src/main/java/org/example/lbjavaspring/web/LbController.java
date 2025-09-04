@@ -8,9 +8,12 @@ import org.example.lbjavaspring.data.Request;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/lb")
@@ -20,14 +23,14 @@ public class LbController {
 
     private final LoadBalancer<String> httpLoadBalancer;
 
-    @GetMapping("/**")
-    public ResponseEntity<String> get(final HttpServletRequest request) {
-        final String path = request.getServletPath().replace("/lb", "");
-        final Request lbRequest = Request.builder()
-                .path(path)
-                .method(HttpMethod.GET)
-                .headers(extractHeaders(request))
-                .build();
+    @RequestMapping(path = "/**", method = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.DELETE, RequestMethod.OPTIONS, RequestMethod.HEAD})
+    public ResponseEntity<String> proxy(final HttpServletRequest request) throws IOException {
+        final String pathOnly = request.getServletPath().replace("/lb", "");
+        final String query = request.getQueryString();
+        final String path = query == null ? pathOnly : pathOnly + "?" + query;
+        final HttpMethod method = HttpMethod.valueOf(request.getMethod());
+        final byte[] body = StreamUtils.copyToByteArray(request.getInputStream());
+        final Request lbRequest = Request.builder().path(path).method(method).headers(extractHeaders(request)).body(body).build();
         log.info("Load balancing {} request :: {}", lbRequest.method(), lbRequest.path());
         return httpLoadBalancer.handle(lbRequest);
     }
