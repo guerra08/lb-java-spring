@@ -7,6 +7,7 @@ import org.example.lbjavaspring.core.LoadBalancer;
 import org.example.lbjavaspring.data.Request;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,7 +33,12 @@ public class LbController {
         final byte[] body = StreamUtils.copyToByteArray(request.getInputStream());
         final Request lbRequest = Request.builder().path(path).method(method).headers(extractHeaders(request)).body(body).build();
         log.info("Load balancing {} request :: {}", lbRequest.method(), lbRequest.path());
-        return httpLoadBalancer.handle(lbRequest);
+        try {
+            return httpLoadBalancer.handle(lbRequest);
+        } catch (IllegalStateException ex) {
+            log.warn("Unable to handle request due to load balancer state: {}", ex.getMessage());
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("Service Unavailable: " + ex.getMessage());
+        }
     }
 
     private HttpHeaders extractHeaders(final HttpServletRequest request) {
@@ -40,5 +46,6 @@ public class LbController {
         request.getHeaderNames().asIterator().forEachRemaining(header -> headers.add(header, request.getHeader(header)));
         return headers;
     }
+
 
 }
