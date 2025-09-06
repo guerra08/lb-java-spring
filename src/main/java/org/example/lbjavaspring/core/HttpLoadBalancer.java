@@ -17,7 +17,7 @@ import static java.lang.System.currentTimeMillis;
 
 @Component
 @Slf4j
-public class HttpLoadBalancer implements LoadBalancer<String> {
+public class HttpLoadBalancer implements LoadBalancer<Request, ResponseEntity<String>> {
 
     private final RestClient restClient = RestClient.create();
     private final AtomicInteger roundRobinCounter = new AtomicInteger(0);

@@ -18,7 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class LbControllerTests {
 
     private MockMvc mockMvc;
-    private final LoadBalancer<String> loadBalancer = mock(LoadBalancer.class);
+    private final LoadBalancer<Request, ResponseEntity<String>> loadBalancer = mock();
 
     @BeforeEach
     void setup() {

@@ -22,7 +22,7 @@ import java.io.IOException;
 @Slf4j
 public class LbController {
 
-    private final LoadBalancer<String> httpLoadBalancer;
+    private final LoadBalancer<Request, ResponseEntity<String>> httpLoadBalancer;
 
     @RequestMapping(path = "/**", method = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.DELETE, RequestMethod.OPTIONS, RequestMethod.HEAD})
     public ResponseEntity<String> proxy(final HttpServletRequest request) throws IOException {
